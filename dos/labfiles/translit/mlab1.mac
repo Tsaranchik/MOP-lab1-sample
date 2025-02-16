@@ -1,0 +1,62 @@
+;*********************************************************
+; Makrosy dlya uchebnogo primera laboratornoy raboty N 1    *
+; po MOP. 10.09.02: Negoda V.N.                           *
+;*********************************************************
+
+; Makros vyvoda stroki LINE 
+PUTL    MACRO LINE
+        LEA   SI,   LINE
+	XOR   CX,   CX
+	XOR   DX,   DX
+	XOR   AX,   AX	
+        CALL  PUTSS
+        ENDM
+
+; Makros vyvoda stroki LINE s zaderzhkoy PAUSE
+PUTLS   MACRO LINE
+	XOR   AX,   AX	
+        LEA   SI,   LINE
+	MOV   DX,   PAUSE
+	MOV   CX,   PAUSE+2
+        CALL  PUTSS
+        ENDM
+
+; Kak i PUTLS, no s tsentrirovaniem poseredine
+PUTLSC  MACRO LINE
+	LOCAL LO, NOMARG
+	LEA   SI,   LINE
+	CALL  SLEN
+	MOV   CX, 80
+	SUB   CX, AX
+	SAR   CX,  1
+	JZ    NOMARG	
+LO:	MOV   AL, ' '
+	CALL  PUTC
+	LOOP  LO
+NOMARG:	PUTLS LINE
+        ENDM
+
+; Makros fiksatsii nachala izmereniya vremeni
+; Zanosit v stek mladshee slovo chisla taktov sistemykh chasov
+FIXTIME	MACRO
+	DB	0Fh, 31h; Komanda RDTSC chteniya schetnika taktov
+	PUSH	EDX
+	PUSH	EAX
+	ENDM
+
+; Makros polucheniya v <EDX,EAX> chisla taktov, proshedshikh s poslednego
+; momenta fiksatsii vremeni. Izvlekaet produkt FIXTIME iz steka
+DURAT	MACRO
+	DB	0Fh, 31h; Komanda RDTSC chteniya schetnika taktov
+	POP	EBX
+	SUB	EAX,	EBX
+	POP	EBX
+	SBB	EDX,	EBX
+	ENDM
+
+; Makros zaversheniya programmy
+EXIT	MACRO
+        MOV     AH, FUEXIT
+        MOV     AL, 0  
+        INT     DOSFU
+        ENDM
